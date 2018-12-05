@@ -16,6 +16,13 @@ class DetailTableViewController: UIViewController {
     
     @IBOutlet weak var detailTableView: UITableView!
     
+    func showErrorAlert(with: String ) {
+        let alert = UIAlertController(title: "Error", message: with, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        
+        present(alert, animated: true)
+    }
+    
     func fetchURL(receiveId : String?) {
         guard let id = receiveId else { return }
         guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movie?id=\(id)") else { return }
@@ -61,7 +68,6 @@ extension DetailTableViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellid, for: indexPath) as! DetailTableViewCell
 
-        print(info)
         if let info = self.info {
             cell.audienceLabel.text = "\(String(describing: info.audience))"
             cell.firstInfoLabel.text = info.title

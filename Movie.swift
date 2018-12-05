@@ -12,10 +12,6 @@ struct OfficeBox: Codable {
     let movies: [Movie]
 }
 
-struct OfficeInfo: Codable {
-    let movieInfo: MovieInfo
-}
-
 struct Movie: Codable {
     let grade: Int
     let thumb: String
@@ -41,6 +37,11 @@ struct Movie: Codable {
         case userRating = "user_rating"
     }
 }
+
+struct OfficeInfo: Codable {
+    let movieInfo: MovieInfo
+}
+
 
 struct MovieInfo: Codable {
     let audience: Int

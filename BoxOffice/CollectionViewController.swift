@@ -22,6 +22,13 @@ class CollectionViewController: UIViewController {
     
     @IBOutlet weak var collectionListView: UICollectionView!
     
+    func showErrorAlert(with: String ) {
+        let alert = UIAlertController(title: "Error", message: with, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        
+        present(alert, animated: true)
+    }
+    
     func fetchURL(orderType: Int) {
         guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
 
@@ -29,7 +36,7 @@ class CollectionViewController: UIViewController {
         let dataTask = session.dataTask(with: url) { (data, response, error) in
 
             if let error = error {
-                print(error.localizedDescription)
+                self.showErrorAlert(with: "\(error.localizedDescription)")
                 return
             }
 
@@ -38,13 +45,12 @@ class CollectionViewController: UIViewController {
             do {
                 let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
                 self.movieList = officeBoxResponse.movies
-
                 DispatchQueue.main.async {
                     self.collectionListView.reloadData()
                 }
 
             } catch let error {
-                print(error.localizedDescription)
+                self.showErrorAlert(with: "\(error.localizedDescription)")
             }
         }
         dataTask.resume()

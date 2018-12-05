@@ -12,9 +12,17 @@ class TableViewController: UIViewController {
     
     @IBOutlet weak var listTableView: UITableView!
     @IBOutlet weak var settingBtn: UIBarButtonItem!
-    var movieList: [Movie] = []
+    var movieList = [Movie]()
     let cellid = "tableViewCell"
     let segueid = "showDetailSegue"
+    
+    func showErrorAlert(with: String ) {
+        let alert = UIAlertController(title: "Error", message: with, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        
+        present(alert, animated: true)
+    }
+    
     
     lazy var refresher: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
@@ -45,8 +53,7 @@ class TableViewController: UIViewController {
         }
     }
         
-        
-        
+
         @objc func showOption() {
             let sheetController = UIAlertController(title: "정렬방식 선택", message: "영화를 어떤 순서로 정렬하시겠습니까?", preferredStyle: .actionSheet)
             
@@ -76,9 +83,18 @@ class TableViewController: UIViewController {
             let dataTask = session.dataTask(with: url) { (data, response, error) in
                 
                 if let error = error {
-                    print(error.localizedDescription)
+                    self.showErrorAlert(with: "\(error.localizedDescription)")
                     return
                 }
+                
+//                guard let httpResonse = response as? HTTPURLResponse else {
+//                    return
+//                }
+//
+//                guard (200...299).contains(httpResonse.statusCode) else {
+//                    print(httpResonse.statusCode)
+//                    return
+//                }
                 
                 guard let data = data else { return }
                 
@@ -89,9 +105,8 @@ class TableViewController: UIViewController {
                     DispatchQueue.main.async {
                         self.listTableView.reloadData()
                     }
-                    
                 } catch let error {
-                    print(error.localizedDescription)
+                    self.showErrorAlert(with:"\(error.localizedDescription)")
                 }
             }
             dataTask.resume()
@@ -152,7 +167,7 @@ class TableViewController: UIViewController {
             
             let cell = listTableView.dequeueReusableCell(withIdentifier: cellid, for: indexPath) as! ListTableViewCell
             
-            let movie: Movie = self.movieList[indexPath.row]
+            let movie = movieList[indexPath.row]
             cell.titleLabel.text = movie.title
             cell.ageImage?.image = UIImage(named: "ic_\(movie.grade)")
             cell.infoLabel.text = movie.tableViewInfoText
