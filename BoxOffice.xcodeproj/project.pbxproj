@@ -18,6 +18,7 @@
 		D69566BE21B68FEA005BAC2B /* DetailTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69566BD21B68FEA005BAC2B /* DetailTableViewCell.swift */; };
 		D69566C021B6900D005BAC2B /* DetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69566BF21B6900D005BAC2B /* DetailTableViewController.swift */; };
 		D69566C221B69250005BAC2B /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69566C121B69250005BAC2B /* Movie.swift */; };
+		D6C7E49821B8E6E900E7314B /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C7E49721B8E6E900E7314B /* Utils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		D69566BD21B68FEA005BAC2B /* DetailTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableViewCell.swift; sourceTree = "<group>"; };
 		D69566BF21B6900D005BAC2B /* DetailTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableViewController.swift; sourceTree = "<group>"; };
 		D69566C121B69250005BAC2B /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
+		D6C7E49721B8E6E900E7314B /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +52,7 @@
 		D695669B21B68358005BAC2B = {
 			isa = PBXGroup;
 			children = (
+				D6C7E49721B8E6E900E7314B /* Utils.swift */,
 				D69566C121B69250005BAC2B /* Movie.swift */,
 				D69566A621B68358005BAC2B /* BoxOffice */,
 				D69566A521B68358005BAC2B /* Products */,
@@ -161,6 +164,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6C7E49821B8E6E900E7314B /* Utils.swift in Sources */,
 				D69566C221B69250005BAC2B /* Movie.swift in Sources */,
 				D69566C021B6900D005BAC2B /* DetailTableViewController.swift in Sources */,
 				D66CB7AD21B6D79F00FB7025 /* ListCollectionViewCell.swift in Sources */,

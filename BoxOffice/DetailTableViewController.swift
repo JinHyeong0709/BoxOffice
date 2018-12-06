@@ -16,14 +16,7 @@ class DetailTableViewController: UIViewController {
     
     @IBOutlet weak var detailTableView: UITableView!
     
-    func showErrorAlert(with: String ) {
-        let alert = UIAlertController(title: "Error", message: with, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        
-        present(alert, animated: true)
-    }
-    
-    func fetchURL(receiveId : String?) {
+    func fetchURL(receiveId id: String) {
         guard let id = receiveId else { return }
         guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movie?id=\(id)") else { return }
         
@@ -31,7 +24,7 @@ class DetailTableViewController: UIViewController {
         let dataTask = session.dataTask(with: url) { (data, response, error) in
             
             if let error = error {
-                print(error.localizedDescription)
+                self.showErrorAlert(with:"\(error.localizedDescription)")
                 return
             }
             
@@ -46,15 +39,25 @@ class DetailTableViewController: UIViewController {
                 }
                 
             } catch let error {
-                print(error.localizedDescription)
+                self.showErrorAlert(with:"\(error.localizedDescription)")
             }
         }
         dataTask.resume()
 
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let id = receiveId {
+            fetchURL(receiveId: id)
+        }
+    }
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationItem.title = info?.title
         // Do any additional setup after loading the view.
     }
 }

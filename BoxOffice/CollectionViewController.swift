@@ -8,9 +8,14 @@
 
 import UIKit
 
+extension NSNotification.Name {
+    static let CollectionValueSender = NSNotification.Name("CollectionValueSender")
+}
+
 class CollectionViewController: UIViewController {
     let cellid = "collectionViewCell"
-    
+    @IBOutlet weak var settingBtn: UIBarButtonItem!
+    var token: NSObjectProtocol?
     var movieList: [Movie] = []
     
 //    lazy var refresher: UIRefreshControl = {
@@ -21,13 +26,6 @@ class CollectionViewController: UIViewController {
 //    }()
     
     @IBOutlet weak var collectionListView: UICollectionView!
-    
-    func showErrorAlert(with: String ) {
-        let alert = UIAlertController(title: "Error", message: with, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        
-        present(alert, animated: true)
-    }
     
     func fetchURL(orderType: Int) {
         guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
@@ -54,18 +52,80 @@ class CollectionViewController: UIViewController {
             }
         }
         dataTask.resume()
-        //changeTitle(orderType: orderType)
+        changeTitle(orderType: orderType)
     }
-
+    
+    func changeTitle(orderType: Int) {
+        switch orderType {
+        case 0:
+            self.navigationItem.title = "예매일순"
+        case 1:
+            self.navigationItem.title = "큐레이션순"
+        case 2:
+            self.navigationItem.title = "개봉일순"
+        default:
+            return
+        }
+    }
+    
+    @objc func showOption() {
+        let sheetController = UIAlertController(title: "정렬방식 선택", message: "영화를 어떤 순서로 정렬하시겠습니까?", preferredStyle: .actionSheet)
+        sheetController.addAction(UIAlertAction(title: "예매율", style: .default, handler: { (action : UIAlertAction) in
+            DispatchQueue.global().async {
+                NotificationCenter.default.post(name: NSNotification.Name.CollectionValueSender, object: nil, userInfo: ["orderType": 0])
+            }
+            return self.fetchURL(orderType: 0)
+        }))
+        sheetController.addAction(UIAlertAction(title: "큐레이션", style: .default, handler: { (action : UIAlertAction) in
+            DispatchQueue.global().async {
+                NotificationCenter.default.post(name: NSNotification.Name.CollectionValueSender, object: nil, userInfo: ["orderType": 1])
+            }
+            return self.fetchURL(orderType: 1)
+        }))
+        sheetController.addAction(UIAlertAction(title: "개봉일", style: .default, handler: { (action : UIAlertAction) in
+            DispatchQueue.global().async {
+                NotificationCenter.default.post(name: NSNotification.Name.CollectionValueSender, object: nil, userInfo: ["orderType": 2])
+            }
+            return self.fetchURL(orderType: 2)
+        }))
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        sheetController.addAction(cancel)
+        present(sheetController, animated: true)
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        token = NotificationCenter.default.addObserver(forName: NSNotification.Name.TableValueSender, object: nil, queue: OperationQueue.main) { [weak self] (notification) in
+            guard let type = notification.userInfo?["orderType"] as? Int else {
+                return
+            }
+            self?.fetchURL(orderType: type)
+        }
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        self.settingBtn.target = self
+        self.settingBtn.action = #selector(showOption)
+        
+       fetchURL(orderType: 0)
+    }
+    
+    deinit {
+        if let token = token {
+            NotificationCenter.default.removeObserver(token)
+        }
     }
 
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        fetchURL(orderType: 0)
     }
+
 }
 
 extension CollectionViewController: UICollectionViewDataSource {
@@ -96,8 +156,6 @@ extension CollectionViewController: UICollectionViewDataSource {
         }
         return cell
     }
-    
-    
 }
 
 extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDelegate {
@@ -110,6 +168,10 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
             
             return CGSize(width: width, height: width * 1.5)
         }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        
+    }
 }
 
 
