@@ -69,39 +69,46 @@ class TableViewController: UIViewController {
     }
 
     func fetchURL(orderType: Int) {
-        guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
-        
-        let session = URLSession(configuration: .default)
-        let dataTask = session.dataTask(with: url) { (data, response, error) in
+        DispatchQueue.global().async {
+            print(Thread.isMainThread ? "Table Main Thread" : "Table Background Thread")
+            guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
             
-            if let error = error {
-                self.showErrorAlert(with: "\(error.localizedDescription)")
-                return
-            }
-            
-            guard let httpResonse = response as? HTTPURLResponse else {
-                return
-            }
-            
-            guard (200...299).contains(httpResonse.statusCode) else {
-                print(httpResonse.statusCode)
-                return
-            }
-            
-            guard let data = data else { return }
-            
-            do {
-                let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
-                self.movieList = officeBoxResponse.movies
+            let session = URLSession(configuration: .default)
+            let dataTask = session.dataTask(with: url) { [unowned self] (data, response, error) in
                 
-                DispatchQueue.main.async {
-                    self.listTableView.reloadData()
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                    }
+                    return
                 }
-            } catch let error {
-                self.showErrorAlert(with:"\(error.localizedDescription)")
+                
+                guard let httpResonse = response as? HTTPURLResponse else {
+                    return
+                }
+                
+                guard (200...299).contains(httpResonse.statusCode) else {
+                    print(httpResonse.statusCode)
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
+                    self.movieList = officeBoxResponse.movies
+                    print(self.movieList)
+                    DispatchQueue.main.async {
+                        self.listTableView.reloadData()
+                    }
+                } catch let error {
+                    DispatchQueue.main.async {
+                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                    }
+                }
             }
+            dataTask.resume()
         }
-        dataTask.resume()
         changeTitle(orderType: orderType)
     }
     
@@ -140,6 +147,7 @@ class TableViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         fetchURL(orderType: orderType)
+        
         if #available(iOS 10.0, *) {
             listTableView.refreshControl = refresher
         } else {
@@ -155,8 +163,6 @@ class TableViewController: UIViewController {
             }
             self?.fetchURL(orderType: type)
         }
-        
-        fetchURL(orderType: 0)
     }
     
     deinit {

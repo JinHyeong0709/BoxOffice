@@ -18,12 +18,12 @@ class CollectionViewController: UIViewController {
     var token: NSObjectProtocol?
     var movieList: [Movie] = []
     
-//    lazy var refresher: UIRefreshControl = {
-//        let refreshControl = UIRefreshControl()
-//        refreshControl.attributedTitle = NSAttributedString(string: "reload Data...")
-//        refreshControl.addTarget(self, action: #selector(refreshData(_:)), for: .valueChanged)
-//        return refreshControl
-//    }()
+    //    lazy var refresher: UIRefreshControl = {
+    //        let refreshControl = UIRefreshControl()
+    //        refreshControl.attributedTitle = NSAttributedString(string: "reload Data...")
+    //        refreshControl.addTarget(self, action: #selector(refreshData(_:)), for: .valueChanged)
+    //        return refreshControl
+    //    }()
     
     @IBOutlet weak var collectionListView: UICollectionView!
     
@@ -39,30 +39,38 @@ class CollectionViewController: UIViewController {
     }
     
     func fetchURL(orderType: Int) {
-        guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
-
-        let session = URLSession(configuration: .default)
-        let dataTask = session.dataTask(with: url) { (data, response, error) in
-
-            if let error = error {
-                self.showErrorAlert(with: "\(error.localizedDescription)")
-                return
-            }
-
-            guard let data = data else { return }
-
-            do {
-                let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
-                self.movieList = officeBoxResponse.movies
-                DispatchQueue.main.async {
-                    self.collectionListView.reloadData()
+        DispatchQueue.global().async {
+            print(Thread.isMainThread ? "Collection Main Thread" : "Collection Background Thread")
+            guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
+            
+            let session = URLSession(configuration: .default)
+            let dataTask = session.dataTask(with: url) { (data, response, error) in
+                
+                if let error = error {
+                    DispatchQueue.main.async {
+                        print(Thread.isMainThread ? "Alert Main Thread" : "Alert Background Thread")
+                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                    }
+                    return
                 }
-
-            } catch let error {
-                self.showErrorAlert(with: "\(error.localizedDescription)")
+                
+                guard let data = data else { return }
+                
+                do {
+                    let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
+                    self.movieList = officeBoxResponse.movies
+                    DispatchQueue.main.async {
+                        self.collectionListView.reloadData()
+                    }
+                    
+                } catch let error {
+                    DispatchQueue.main.async {
+                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                    }
+                }
             }
+            dataTask.resume()
         }
-        dataTask.resume()
         changeTitle(orderType: orderType)
     }
     
@@ -123,7 +131,7 @@ class CollectionViewController: UIViewController {
         self.settingBtn.target = self
         self.settingBtn.action = #selector(showOption)
         
-       fetchURL(orderType: 0)
+        fetchURL(orderType: 0)
     }
     
     deinit {
@@ -131,12 +139,12 @@ class CollectionViewController: UIViewController {
             NotificationCenter.default.removeObserver(token)
         }
     }
-
+    
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
     }
-
+    
 }
 
 extension CollectionViewController: UICollectionViewDataSource {
@@ -171,14 +179,14 @@ extension CollectionViewController: UICollectionViewDataSource {
 
 extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-            guard let layout = collectionViewLayout as? UICollectionViewFlowLayout else {
-                return CGSize.zero
-            }
-            
-            let width = (collectionView.bounds.width - (layout.sectionInset.left + layout.sectionInset.right + layout.minimumLineSpacing)) / 2
-            
-            return CGSize(width: width, height: width * 1.5)
+        guard let layout = collectionViewLayout as? UICollectionViewFlowLayout else {
+            return CGSize.zero
         }
+        
+        let width = (collectionView.bounds.width - (layout.sectionInset.left + layout.sectionInset.right + layout.minimumLineSpacing)) / 2
+        
+        return CGSize(width: width, height: width * 1.5)
+    }
 }
 
 
