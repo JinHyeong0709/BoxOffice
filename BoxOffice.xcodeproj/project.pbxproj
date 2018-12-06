@@ -16,7 +16,7 @@
 		D69566BA21B685B7005BAC2B /* CollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69566B921B685B7005BAC2B /* CollectionViewController.swift */; };
 		D69566BC21B68740005BAC2B /* ListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69566BB21B68740005BAC2B /* ListTableViewCell.swift */; };
 		D69566BE21B68FEA005BAC2B /* DetailTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69566BD21B68FEA005BAC2B /* DetailTableViewCell.swift */; };
-		D69566C021B6900D005BAC2B /* DetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69566BF21B6900D005BAC2B /* DetailTableViewController.swift */; };
+		D69566C021B6900D005BAC2B /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69566BF21B6900D005BAC2B /* DetailViewController.swift */; };
 		D69566C221B69250005BAC2B /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69566C121B69250005BAC2B /* Movie.swift */; };
 		D6C7E49821B8E6E900E7314B /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C7E49721B8E6E900E7314B /* Utils.swift */; };
 /* End PBXBuildFile section */
@@ -33,7 +33,7 @@
 		D69566B921B685B7005BAC2B /* CollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewController.swift; sourceTree = "<group>"; };
 		D69566BB21B68740005BAC2B /* ListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTableViewCell.swift; sourceTree = "<group>"; };
 		D69566BD21B68FEA005BAC2B /* DetailTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableViewCell.swift; sourceTree = "<group>"; };
-		D69566BF21B6900D005BAC2B /* DetailTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableViewController.swift; sourceTree = "<group>"; };
+		D69566BF21B6900D005BAC2B /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		D69566C121B69250005BAC2B /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
 		D6C7E49721B8E6E900E7314B /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -74,7 +74,7 @@
 				D69566A721B68358005BAC2B /* AppDelegate.swift */,
 				D69566AB21B68358005BAC2B /* Main.storyboard */,
 				D69566B021B68359005BAC2B /* LaunchScreen.storyboard */,
-				D69566BF21B6900D005BAC2B /* DetailTableViewController.swift */,
+				D69566BF21B6900D005BAC2B /* DetailViewController.swift */,
 				D69566A921B68358005BAC2B /* TableViewController.swift */,
 				D69566AE21B68359005BAC2B /* Assets.xcassets */,
 				D69566B921B685B7005BAC2B /* CollectionViewController.swift */,
@@ -166,7 +166,7 @@
 			files = (
 				D6C7E49821B8E6E900E7314B /* Utils.swift in Sources */,
 				D69566C221B69250005BAC2B /* Movie.swift in Sources */,
-				D69566C021B6900D005BAC2B /* DetailTableViewController.swift in Sources */,
+				D69566C021B6900D005BAC2B /* DetailViewController.swift in Sources */,
 				D66CB7AD21B6D79F00FB7025 /* ListCollectionViewCell.swift in Sources */,
 				D69566BA21B685B7005BAC2B /* CollectionViewController.swift in Sources */,
 				D69566BC21B68740005BAC2B /* ListTableViewCell.swift in Sources */,

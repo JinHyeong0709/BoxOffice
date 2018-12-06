@@ -42,7 +42,6 @@ struct OfficeInfo: Codable {
     let movieInfo: MovieInfo
 }
 
-
 struct MovieInfo: Codable {
     let audience: Int
     let actor: String
@@ -58,7 +57,7 @@ struct MovieInfo: Codable {
     let userRating: Double
     let date: String
     let id: String
-    
+        
     enum CodingKeys: String, CodingKey {
         case audience, actor, duration, director, synopsis, genre, grade, image, title, date, id
         case reservationGrade = "reservation_grade"

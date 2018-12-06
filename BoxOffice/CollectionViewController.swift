@@ -27,6 +27,17 @@ class CollectionViewController: UIViewController {
     
     @IBOutlet weak var collectionListView: UICollectionView!
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let detailVC = segue.destination as? DetailViewController {
+            if let cell = sender as? ListCollectionViewCell {
+                if let indexPath = collectionListView.indexPath(for: cell) {
+                    let target = movieList[indexPath.item]
+                    detailVC.receiveId = target.id
+                }
+            }
+        }
+    }
+    
     func fetchURL(orderType: Int) {
         guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
 
@@ -168,10 +179,6 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
             
             return CGSize(width: width, height: width * 1.5)
         }
-    
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
-    }
 }
 
 

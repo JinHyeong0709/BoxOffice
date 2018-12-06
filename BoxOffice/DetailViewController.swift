@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DetailTableViewController: UIViewController {
+class DetailViewController: UIViewController {
 
     let cellid = "detailTableViewCell"
     var receiveId: String?
@@ -63,7 +63,7 @@ class DetailTableViewController: UIViewController {
 }
     
     
-extension DetailTableViewController: UITableViewDataSource {
+extension DetailViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
@@ -82,6 +82,6 @@ extension DetailTableViewController: UITableViewDataSource {
     
 }
 
-extension DetailTableViewController: UITableViewDelegate {
+extension DetailViewController: UITableViewDelegate {
     
 }

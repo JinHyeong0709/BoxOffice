@@ -107,7 +107,7 @@ class TableViewController: UIViewController {
     
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let detailVC = segue.destination as? DetailTableViewController {
+        if let detailVC = segue.destination as? DetailViewController {
             if let cell = sender as? ListTableViewCell {
                 if let indexPath = listTableView.indexPath(for: cell) {
                     let target = movieList[indexPath.row]
