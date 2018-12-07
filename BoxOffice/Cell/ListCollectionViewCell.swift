@@ -19,6 +19,7 @@ class ListCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         self.infoLabel.adjustsFontSizeToFitWidth = true
-        
+        self.titleLabel.adjustsFontSizeToFitWidth = true
+        self.dateLabel.adjustsFontSizeToFitWidth = true
     }
 }

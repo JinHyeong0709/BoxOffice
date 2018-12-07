@@ -66,7 +66,7 @@ struct MovieInfo: Codable {
             case reservationRate = "reservation_rate"
             case userRating = "user_rating"
         }
-    }
+}
 
 //comment
 struct ComentsInfo: Codable {

@@ -24,13 +24,18 @@ class DetailTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        self.firstInfoLabel.adjustsFontSizeToFitWidth = true
+        self.secondInfoLabel.adjustsFontSizeToFitWidth = true
+        self.thirdInfoLabel.adjustsFontSizeToFitWidth = true
+        
+        self.reservationRateLabel.adjustsFontSizeToFitWidth = true
+        self.userRatingLabel.adjustsFontSizeToFitWidth = true
+        self.audienceLabel.adjustsFontSizeToFitWidth = true
     }
-
+    
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
+        
         // Configure the view for the selected state
     }
-
 }

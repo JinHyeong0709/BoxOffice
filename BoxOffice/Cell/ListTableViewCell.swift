@@ -18,6 +18,8 @@ class ListTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        self.dateLabel.adjustsFontSizeToFitWidth = true
+        self.titleLabel.adjustsFontSizeToFitWidth = true
         self.infoLabel.adjustsFontSizeToFitWidth = true
         // Initialization code
     }
