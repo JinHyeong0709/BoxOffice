@@ -15,15 +15,27 @@ extension NSNotification.Name {
 class CollectionViewController: UIViewController {
     let cellid = "collectionViewCell"
     @IBOutlet weak var settingBtn: UIBarButtonItem!
+    @IBOutlet weak var indicator: UIActivityIndicatorView!
     var token: NSObjectProtocol?
     var movieList: [Movie] = []
+    var orderType: Int = 0
     
-    //    lazy var refresher: UIRefreshControl = {
-    //        let refreshControl = UIRefreshControl()
-    //        refreshControl.attributedTitle = NSAttributedString(string: "reload Data...")
-    //        refreshControl.addTarget(self, action: #selector(refreshData(_:)), for: .valueChanged)
-    //        return refreshControl
-    //    }()
+    
+    lazy var refresher: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.attributedTitle = NSAttributedString(string: "reload Data...")
+        refreshControl.addTarget(self, action: #selector(refreshData(_:)), for: .valueChanged)
+        return refreshControl
+    }()
+    
+    
+    @objc func refreshData(_ sender: Any) {
+        fetchURL(orderType: self.orderType)
+        let deadline = DispatchTime.now() + .milliseconds(700)
+        DispatchQueue.main.asyncAfter(deadline: deadline) {
+            self.refresher.endRefreshing()
+        }
+    }
     
     @IBOutlet weak var collectionListView: UICollectionView!
     
@@ -39,6 +51,7 @@ class CollectionViewController: UIViewController {
     }
     
     func fetchURL(orderType: Int) {
+        self.indicator.startAnimating()
         DispatchQueue.global().async {
             print(Thread.isMainThread ? "Collection Main Thread" : "Collection Background Thread")
             guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
@@ -55,7 +68,9 @@ class CollectionViewController: UIViewController {
                 }
                 
                 guard let data = data else { return }
-                
+                DispatchQueue.main.async {
+                    self?.indicator.stopAnimating()
+                }
                 do {
                     let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
                     self?.movieList = officeBoxResponse.movies
@@ -77,7 +92,7 @@ class CollectionViewController: UIViewController {
     func changeTitle(orderType: Int) {
         switch orderType {
         case 0:
-            self.navigationItem.title = "예매일순"
+            self.navigationItem.title = "예매율순"
         case 1:
             self.navigationItem.title = "큐레이션순"
         case 2:
@@ -90,22 +105,25 @@ class CollectionViewController: UIViewController {
     @objc func showOption() {
         let sheetController = UIAlertController(title: "정렬방식 선택", message: "영화를 어떤 순서로 정렬하시겠습니까?", preferredStyle: .actionSheet)
         sheetController.addAction(UIAlertAction(title: "예매율", style: .default, handler: { (action : UIAlertAction) in
+            self.orderType = 0
             DispatchQueue.global().async {
-                NotificationCenter.default.post(name: NSNotification.Name.CollectionValueSender, object: nil, userInfo: ["orderType": 0])
+                NotificationCenter.default.post(name: NSNotification.Name.CollectionValueSender, object: nil, userInfo: ["orderType": self.orderType])
             }
-            return self.fetchURL(orderType: 0)
+            return self.fetchURL(orderType: self.orderType)
         }))
         sheetController.addAction(UIAlertAction(title: "큐레이션", style: .default, handler: { (action : UIAlertAction) in
+            self.orderType = 1
             DispatchQueue.global().async {
-                NotificationCenter.default.post(name: NSNotification.Name.CollectionValueSender, object: nil, userInfo: ["orderType": 1])
+                NotificationCenter.default.post(name: NSNotification.Name.CollectionValueSender, object: nil, userInfo: ["orderType": self.orderType])
             }
-            return self.fetchURL(orderType: 1)
+            return self.fetchURL(orderType: self.orderType)
         }))
         sheetController.addAction(UIAlertAction(title: "개봉일", style: .default, handler: { (action : UIAlertAction) in
+            self.orderType = 2
             DispatchQueue.global().async {
-                NotificationCenter.default.post(name: NSNotification.Name.CollectionValueSender, object: nil, userInfo: ["orderType": 2])
+                NotificationCenter.default.post(name: NSNotification.Name.CollectionValueSender, object: nil, userInfo: ["orderType": self.orderType])
             }
-            return self.fetchURL(orderType: 2)
+            return self.fetchURL(orderType: self.orderType)
         }))
         let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
@@ -121,7 +139,8 @@ class CollectionViewController: UIViewController {
             guard let type = notification.userInfo?["orderType"] as? Int else {
                 return
             }
-            self?.fetchURL(orderType: type)
+            self?.orderType = type
+            self?.fetchURL(orderType: self?.orderType ?? 0)
         }
     }
     
@@ -131,7 +150,16 @@ class CollectionViewController: UIViewController {
         self.settingBtn.target = self
         self.settingBtn.action = #selector(showOption)
         
-        fetchURL(orderType: 0)
+        fetchURL(orderType: self.orderType)
+        
+        self.view.bringSubviewToFront(indicator)
+
+        if #available(iOS 10.0, *) {
+            collectionListView.refreshControl = refresher
+        } else {
+            collectionListView.addSubview(refresher)
+        }
+        
     }
     
     deinit {
@@ -140,11 +168,13 @@ class CollectionViewController: UIViewController {
         }
     }
     
-    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
     }
     
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
 }
 
 extension CollectionViewController: UICollectionViewDataSource {

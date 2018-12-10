@@ -23,12 +23,13 @@ class DetailViewController: UIViewController {
     var receiveId: String?
     var info: MovieInfo?
     var commentList: [Comment] = []
-    
+    @IBOutlet weak var indicator: UIActivityIndicatorView!
     @IBOutlet weak var detailTableView: UITableView!
+    
     
     func fetchMovieInfoURL(receiveId : String? ) {
         guard let id = receiveId else { return }
-        
+        self.indicator.startAnimating()
         DispatchQueue.global().async {
             print(Thread.isMainThread ? "Detail Main Thread" : "Detail Background Thread")
             guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movie?id=\(id))") else { return }
@@ -44,6 +45,10 @@ class DetailViewController: UIViewController {
                 }
                 
                 guard let data = data else { return }
+                
+                DispatchQueue.main.async {
+                    self?.indicator.stopAnimating()
+                }
                 
                 do {
                     let infoResponse : MovieInfo = try JSONDecoder().decode(MovieInfo.self, from: data)
@@ -66,6 +71,7 @@ class DetailViewController: UIViewController {
     
     func fetchCommentURL(receiveId : String? ) {
         guard let id = receiveId else { return }
+        self.indicator.startAnimating()
         guard let url2 = URL(string: "http://connect-boxoffice.run.goorm.io/comments?movie_id=\(id)") else { return }
         
         let dataTask2 = URLSession(configuration: .default).dataTask(with: url2) { [weak self] (data, response, error) in
@@ -78,6 +84,9 @@ class DetailViewController: UIViewController {
             }
             
             guard let data = data else { return }
+            DispatchQueue.main.async {
+                self?.indicator.stopAnimating()
+            }
             
             do {
                 let commentResponse : ComentsInfo = try JSONDecoder().decode(ComentsInfo.self, from: data)
@@ -121,11 +130,14 @@ class DetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("detail ViewDidLoad")
-        
         self.fetchMovieInfoURL(receiveId: receiveId)
         self.fetchCommentURL(receiveId: receiveId)
-        
+        self.view.bringSubviewToFront(indicator)
     }
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
 }
 
 

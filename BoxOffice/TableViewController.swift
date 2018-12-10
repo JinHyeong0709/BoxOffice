@@ -16,6 +16,7 @@ class TableViewController: UIViewController {
     
     @IBOutlet weak var listTableView: UITableView!
     @IBOutlet weak var settingBtn: UIBarButtonItem!
+    @IBOutlet weak var indicator: UIActivityIndicatorView!
     private let cellid = "tableViewCell"
     private let segueid = "showDetailSegue"
     var movieList = [Movie]()
@@ -30,36 +31,36 @@ class TableViewController: UIViewController {
     }()
     
     @objc func refreshData(_ sender: Any) {
-        fetchURL(orderType: 0)
+        fetchURL(orderType: self.orderType)
         let deadline = DispatchTime.now() + .milliseconds(700)
         DispatchQueue.main.asyncAfter(deadline: deadline) {
             self.refresher.endRefreshing()
         }
     }
     
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return UIStatusBarStyle.lightContent
-    }
-    
     @objc func showOption() {
         let sheetController = UIAlertController(title: "정렬방식 선택", message: "영화를 어떤 순서로 정렬하시겠습니까?", preferredStyle: .actionSheet)
         sheetController.addAction(UIAlertAction(title: "예매율", style: .default, handler: { (action : UIAlertAction) in
+            self.orderType = 0
             DispatchQueue.global().async {
-                NotificationCenter.default.post(name: NSNotification.Name.TableValueSender, object: nil, userInfo: ["orderType": 0])
+                NotificationCenter.default.post(name: NSNotification.Name.TableValueSender, object: nil, userInfo: ["orderType": self.orderType])
             }
-            return self.fetchURL(orderType: 0)
+            return self.fetchURL(orderType: self.orderType)
         }))
         sheetController.addAction(UIAlertAction(title: "큐레이션", style: .default, handler: { (action : UIAlertAction) in
+            self.orderType = 1
             DispatchQueue.global().async {
-                NotificationCenter.default.post(name: NSNotification.Name.TableValueSender, object: nil, userInfo: ["orderType": 1])
+                NotificationCenter.default.post(name: NSNotification.Name.TableValueSender, object: nil, userInfo: ["orderType": self.orderType])
             }
-            return self.fetchURL(orderType: 1)
+            
+            return self.fetchURL(orderType: self.orderType)
         }))
         sheetController.addAction(UIAlertAction(title: "개봉일", style: .default, handler: { (action : UIAlertAction) in
+            self.orderType = 2
             DispatchQueue.global().async {
-                NotificationCenter.default.post(name: NSNotification.Name.TableValueSender, object: nil, userInfo: ["orderType": 2])
+                NotificationCenter.default.post(name: NSNotification.Name.TableValueSender, object: nil, userInfo: ["orderType": self.orderType])
             }
-            return self.fetchURL(orderType: 2)
+            return self.fetchURL(orderType: self.orderType)
         }))
         let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
@@ -69,6 +70,7 @@ class TableViewController: UIViewController {
     }
 
     func fetchURL(orderType: Int) {
+        self.indicator.startAnimating()
         DispatchQueue.global().async {
             print(Thread.isMainThread ? "Table Main Thread" : "Table Background Thread")
             guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
@@ -93,7 +95,9 @@ class TableViewController: UIViewController {
                 }
                 
                 guard let data = data else { return }
-                
+                DispatchQueue.main.async {
+                    self?.indicator.stopAnimating()
+                }
                 do {
                     let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
                     self?.movieList = officeBoxResponse.movies
@@ -147,6 +151,8 @@ class TableViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("tableView viewDidLoad")
+        self.view.bringSubviewToFront(indicator)
+
         if #available(iOS 10.0, *) {
             listTableView.refreshControl = refresher
         } else {
@@ -160,9 +166,19 @@ class TableViewController: UIViewController {
             guard let type = notification.userInfo?["orderType"] as? Int else {
                 return
             }
-            self?.fetchURL(orderType: type)
+            self?.orderType = type
+            self?.fetchURL(orderType: self?.orderType ?? 0)
         }
     }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return UIStatusBarStyle.lightContent
+    }
+    
     
     deinit {
         if let token = token {

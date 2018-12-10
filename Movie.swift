@@ -24,11 +24,11 @@ struct Movie: Codable {
     let id: String
     
     var tableViewInfoText: String {
-        return "평점 : \(self.userRating) 예매율 : \(self.reservationRate) 예매순위 : \(self.reservationGrade)"
+        return "평점 : \(self.userRating) 예매율 : \(self.reservationRate)% 예매순위 : \(self.reservationGrade)위"
     }
     
     var collectionViewInfoText: String {
-        return "\(self.reservationGrade)위(\(self.userRating) / \(self.reservationRate)%"
+        return "\(self.reservationGrade)위(\(self.userRating) / \(self.reservationRate)%)"
     }
     
     enum CodingKeys: String, CodingKey {
