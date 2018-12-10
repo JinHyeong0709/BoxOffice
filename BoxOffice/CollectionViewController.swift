@@ -44,12 +44,12 @@ class CollectionViewController: UIViewController {
             guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
             
             let session = URLSession(configuration: .default)
-            let dataTask = session.dataTask(with: url) { (data, response, error) in
+            let dataTask = session.dataTask(with: url) { [weak self] (data, response, error) in
                 
                 if let error = error {
                     DispatchQueue.main.async {
                         print(Thread.isMainThread ? "Alert Main Thread" : "Alert Background Thread")
-                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                        self?.showErrorAlert(with:"\(error.localizedDescription)")
                     }
                     return
                 }
@@ -58,14 +58,14 @@ class CollectionViewController: UIViewController {
                 
                 do {
                     let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
-                    self.movieList = officeBoxResponse.movies
+                    self?.movieList = officeBoxResponse.movies
                     DispatchQueue.main.async {
-                        self.collectionListView.reloadData()
+                        self?.collectionListView.reloadData()
                     }
                     
                 } catch let error {
                     DispatchQueue.main.async {
-                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                        self?.showErrorAlert(with:"\(error.localizedDescription)")
                     }
                 }
             }

@@ -74,11 +74,11 @@ class TableViewController: UIViewController {
             guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
             
             let session = URLSession(configuration: .default)
-            let dataTask = session.dataTask(with: url) { [unowned self] (data, response, error) in
+            let dataTask = session.dataTask(with: url) { [weak self] (data, response, error) in
                 
                 if let error = error {
                     DispatchQueue.main.async {
-                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                        self?.showErrorAlert(with:"\(error.localizedDescription)")
                     }
                     return
                 }
@@ -96,14 +96,13 @@ class TableViewController: UIViewController {
                 
                 do {
                     let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
-                    self.movieList = officeBoxResponse.movies
-                    print(self.movieList)
+                    self?.movieList = officeBoxResponse.movies
                     DispatchQueue.main.async {
-                        self.listTableView.reloadData()
+                        self?.listTableView.reloadData()
                     }
                 } catch let error {
                     DispatchQueue.main.async {
-                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                        self?.showErrorAlert(with:"\(error.localizedDescription)")
                     }
                 }
             }
@@ -127,7 +126,7 @@ class TableViewController: UIViewController {
     func changeTitle(orderType: Int) {
         switch orderType {
         case 0:
-            self.navigationItem.title = "예매일순"
+            self.navigationItem.title = "예매율순"
         case 1:
             self.navigationItem.title = "큐레이션순"
         case 2:
@@ -138,16 +137,16 @@ class TableViewController: UIViewController {
     }
     
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-//        changeTitle(orderType: orderType)
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        print("tableView viewWillAppear")
+
+        self.fetchURL(orderType: orderType)
     }
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        fetchURL(orderType: orderType)
-        
+        print("tableView viewDidLoad")
         if #available(iOS 10.0, *) {
             listTableView.refreshControl = refresher
         } else {

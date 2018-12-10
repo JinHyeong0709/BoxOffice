@@ -34,12 +34,11 @@ class DetailViewController: UIViewController {
             guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movie?id=\(id))") else { return }
             
             let session = URLSession(configuration: .default)
-            let dataTask = session.dataTask(with: url) { [unowned self] (data, response, error) in
-                print(url)
+            let dataTask = session.dataTask(with: url) { [weak self] (data, response, error) in
                 
                 if let error = error {
                     DispatchQueue.main.async {
-                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                        self?.showErrorAlert(with:"\(error.localizedDescription)")
                     }
                     return
                 }
@@ -48,18 +47,16 @@ class DetailViewController: UIViewController {
                 
                 do {
                     let infoResponse : MovieInfo = try JSONDecoder().decode(MovieInfo.self, from: data)
-                    self.info = infoResponse
-                    print(infoResponse.actor)
-                    print(infoResponse)
+                    self?.info = infoResponse
                     
                     DispatchQueue.main.async {
-                        self.detailTableView.reloadData()
+                        self?.detailTableView.reloadData()
                     }
                     
                 } catch let error {
                     DispatchQueue.main.async {
                         print(Thread.isMainThread ? "Alert Main Thread" : "Alert Background Thread")
-                        self.showErrorAlert(with:"\(error.localizedDescription)")
+                        self?.showErrorAlert(with:"\(error.localizedDescription)")
                     }
                 }
             }
@@ -71,12 +68,11 @@ class DetailViewController: UIViewController {
         guard let id = receiveId else { return }
         guard let url2 = URL(string: "http://connect-boxoffice.run.goorm.io/comments?movie_id=\(id)") else { return }
         
-        let dataTask2 = URLSession(configuration: .default).dataTask(with: url2) { [unowned self] (data, response, error) in
-            print(url2)
+        let dataTask2 = URLSession(configuration: .default).dataTask(with: url2) { [weak self] (data, response, error) in
             
             if let error = error {
                 DispatchQueue.main.async {
-                    self.showErrorAlert(with:"\(error.localizedDescription)")
+                    self?.showErrorAlert(with:"\(error.localizedDescription)")
                 }
                 return
             }
@@ -85,16 +81,15 @@ class DetailViewController: UIViewController {
             
             do {
                 let commentResponse : ComentsInfo = try JSONDecoder().decode(ComentsInfo.self, from: data)
-                self.commentList =  commentResponse.comments
-                print(self.commentList)
+                self?.commentList =  commentResponse.comments
                 DispatchQueue.main.async {
-                    self.detailTableView.reloadData()
+                    self?.detailTableView.reloadData()
                 }
                 
             } catch let error {
                 DispatchQueue.main.async {
                     print(Thread.isMainThread ? "Alert Main Thread" : "Alert Background Thread")
-                    self.showErrorAlert(with:"\(error.localizedDescription)")
+                    self?.showErrorAlert(with:"\(error.localizedDescription)")
                 }
             }
         }
@@ -104,13 +99,32 @@ class DetailViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        fetchMovieInfoURL(receiveId: receiveId)
-        fetchCommentURL(receiveId: receiveId)
+        print("detail viewWillAppear")
+        
+        
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        print("detail ViewDidDisappear")
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        print("detail viewDidAppear")
+        guard let target = info else { return }
+        self.navigationItem.title = target.title
+        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationItem.title = info?.title
+        print("detail ViewDidLoad")
+        
+        self.fetchMovieInfoURL(receiveId: receiveId)
+        self.fetchCommentURL(receiveId: receiveId)
+        
     }
 }
 
