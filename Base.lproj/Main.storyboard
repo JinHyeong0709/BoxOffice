@@ -122,7 +122,7 @@
             </objects>
             <point key="canvasLocation" x="1968.8" y="-270.31484257871068"/>
         </scene>
-        <!--영화-->
+        <!--Detail View Controller-->
         <scene sceneID="HFC-ng-NuE">
             <objects>
                 <viewController id="GFc-Fh-xox" customClass="DetailViewController" customModule="BoxOffice" customModuleProvider="target" sceneMemberID="viewController">
@@ -477,7 +477,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="l2h-Na-bR0"/>
                     </view>
-                    <navigationItem key="navigationItem" title="영화" id="xsJ-Ir-ohS"/>
+                    <navigationItem key="navigationItem" id="xsJ-Ir-ohS"/>
                     <connections>
                         <outlet property="detailTableView" destination="qFM-e0-b3T" id="kDK-8f-Yt6"/>
                         <outlet property="indicator" destination="QmZ-es-Jqh" id="VG8-Zb-5Ef"/>
@@ -690,7 +690,7 @@
         <image name="img_placeholder" width="100" height="140"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="sNi-xA-IDK"/>
+        <segue reference="7be-yg-ZEk"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
 </document>
