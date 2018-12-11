@@ -57,6 +57,9 @@
 			isa = PBXGroup;
 			children = (
 				D69566C121B69250005BAC2B /* Movie.swift */,
+				D69566AB21B68358005BAC2B /* Main.storyboard */,
+				D69566B021B68359005BAC2B /* LaunchScreen.storyboard */,
+				D69566AE21B68359005BAC2B /* Assets.xcassets */,
 				D69566A621B68358005BAC2B /* BoxOffice */,
 				D69566A521B68358005BAC2B /* Products */,
 			);
@@ -75,11 +78,8 @@
 			children = (
 				D6BE708421B7A0B000A849BB /* Cell */,
 				D69566A721B68358005BAC2B /* AppDelegate.swift */,
-				D69566AB21B68358005BAC2B /* Main.storyboard */,
-				D69566B021B68359005BAC2B /* LaunchScreen.storyboard */,
 				D69566BF21B6900D005BAC2B /* DetailViewController.swift */,
 				D69566A921B68358005BAC2B /* TableViewController.swift */,
-				D69566AE21B68359005BAC2B /* Assets.xcassets */,
 				D69566B921B685B7005BAC2B /* CollectionViewController.swift */,
 				D69566B321B68359005BAC2B /* Info.plist */,
 			);

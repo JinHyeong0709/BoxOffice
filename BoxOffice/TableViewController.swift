@@ -14,11 +14,11 @@ extension NSNotification.Name {
 
 class TableViewController: UIViewController {
     
+    //MARK:- Property
     @IBOutlet weak var listTableView: UITableView!
     @IBOutlet weak var settingBtn: UIBarButtonItem!
     @IBOutlet weak var indicator: UIActivityIndicatorView!
-    private let cellid = "tableViewCell"
-    private let segueid = "showDetailSegue"
+    private let cellId = "tableViewCell"
     var movieList = [Movie]()
     var orderType : Int = 0
     var token : NSObjectProtocol?
@@ -30,9 +30,48 @@ class TableViewController: UIViewController {
         return refreshControl
     }()
     
+    //MARK:-FetchURL
+    func fetchURL(orderType: Int) {
+        self.indicator.startAnimating()
+        DispatchQueue.global().async {
+            guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
+            
+            let session = URLSession(configuration: .default)
+            let dataTask = session.dataTask(with: url) { [weak self] (data, response, error) in
+                
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self?.showErrorAlert(with:"\(error.localizedDescription)")
+                    }
+                    return
+                }
+            
+                guard let data = data else { return }
+                DispatchQueue.main.async {
+                    self?.indicator.stopAnimating()
+                }
+                
+                do {
+                    let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
+                    self?.movieList = officeBoxResponse.movies
+                    DispatchQueue.main.async {
+                        self?.listTableView.reloadData()
+                    }
+                } catch let error {
+                    DispatchQueue.main.async {
+                        self?.showErrorAlert(with:"\(error.localizedDescription)")
+                    }
+                }
+            }
+            dataTask.resume()
+        }
+        changeTitle(orderType: orderType)
+    }
+    
+    //MARK:- Function
     @objc func refreshData(_ sender: Any) {
         fetchURL(orderType: self.orderType)
-        let deadline = DispatchTime.now() + .milliseconds(700)
+        let deadline = DispatchTime.now() + .milliseconds(800)
         DispatchQueue.main.asyncAfter(deadline: deadline) {
             self.refresher.endRefreshing()
         }
@@ -52,7 +91,6 @@ class TableViewController: UIViewController {
             DispatchQueue.global().async {
                 NotificationCenter.default.post(name: NSNotification.Name.TableValueSender, object: nil, userInfo: ["orderType": self.orderType])
             }
-            
             return self.fetchURL(orderType: self.orderType)
         }))
         sheetController.addAction(UIAlertAction(title: "개봉일", style: .default, handler: { (action : UIAlertAction) in
@@ -62,69 +100,11 @@ class TableViewController: UIViewController {
             }
             return self.fetchURL(orderType: self.orderType)
         }))
+        
         let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
         sheetController.addAction(cancel)
         present(sheetController, animated: true)
-        
-    }
-
-    func fetchURL(orderType: Int) {
-        self.indicator.startAnimating()
-        DispatchQueue.global().async {
-            print(Thread.isMainThread ? "Table Main Thread" : "Table Background Thread")
-            guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
-            
-            let session = URLSession(configuration: .default)
-            let dataTask = session.dataTask(with: url) { [weak self] (data, response, error) in
-                
-                if let error = error {
-                    DispatchQueue.main.async {
-                        self?.showErrorAlert(with:"\(error.localizedDescription)")
-                    }
-                    return
-                }
-                
-                guard let httpResonse = response as? HTTPURLResponse else {
-                    return
-                }
-                
-                guard (200...299).contains(httpResonse.statusCode) else {
-                    print(httpResonse.statusCode)
-                    return
-                }
-                
-                guard let data = data else { return }
-                DispatchQueue.main.async {
-                    self?.indicator.stopAnimating()
-                }
-                do {
-                    let officeBoxResponse : OfficeBox = try JSONDecoder().decode(OfficeBox.self, from: data)
-                    self?.movieList = officeBoxResponse.movies
-                    DispatchQueue.main.async {
-                        self?.listTableView.reloadData()
-                    }
-                } catch let error {
-                    DispatchQueue.main.async {
-                        self?.showErrorAlert(with:"\(error.localizedDescription)")
-                    }
-                }
-            }
-            dataTask.resume()
-        }
-        changeTitle(orderType: orderType)
-    }
-    
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let detailVC = segue.destination as? DetailViewController {
-            if let cell = sender as? ListTableViewCell {
-                if let indexPath = listTableView.indexPath(for: cell) {
-                    let target = movieList[indexPath.row]
-                    detailVC.receiveId = target.id
-                }
-            }
-        }
     }
     
     func changeTitle(orderType: Int) {
@@ -140,11 +120,22 @@ class TableViewController: UIViewController {
         }
     }
     
+    //MAKR:- Override
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let detailVC = segue.destination as? DetailViewController {
+            if let cell = sender as? ListTableViewCell {
+                if let indexPath = listTableView.indexPath(for: cell) {
+                    let target = movieList[indexPath.row]
+                    detailVC.receiveId = target.id
+                }
+            }
+        }
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("tableView viewWillAppear")
-
+        
         self.fetchURL(orderType: orderType)
     }
     
@@ -152,13 +143,13 @@ class TableViewController: UIViewController {
         super.viewDidLoad()
         print("tableView viewDidLoad")
         self.view.bringSubviewToFront(indicator)
-
+        
         if #available(iOS 10.0, *) {
             listTableView.refreshControl = refresher
         } else {
             listTableView.addSubview(refresher)
         }
-
+        
         self.settingBtn.target = self
         self.settingBtn.action = #selector(showOption)
         
@@ -171,6 +162,12 @@ class TableViewController: UIViewController {
         }
     }
     
+    deinit {
+        if let token = token {
+            NotificationCenter.default.removeObserver(token)
+        }
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -179,14 +176,8 @@ class TableViewController: UIViewController {
         return UIStatusBarStyle.lightContent
     }
     
-    
-    deinit {
-        if let token = token {
-            NotificationCenter.default.removeObserver(token)
-        }
-    }
 }
-
+//MARK:- Extension
 extension TableViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return movieList.count
@@ -194,7 +185,7 @@ extension TableViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = listTableView.dequeueReusableCell(withIdentifier: cellid, for: indexPath) as! ListTableViewCell
+        let cell = listTableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! ListTableViewCell
         
         let movie = movieList[indexPath.row]
         cell.titleLabel.text = movie.title
@@ -205,7 +196,6 @@ extension TableViewController: UITableViewDataSource {
         DispatchQueue.global().async {
             guard let posterURL = URL(string: movie.thumb) else { return }
             guard let imageData = try? Data(contentsOf: posterURL) else { return }
-            
             DispatchQueue.main.async {
                 if let index = self.listTableView.indexPath(for: cell) {
                     if index.row == indexPath.row {

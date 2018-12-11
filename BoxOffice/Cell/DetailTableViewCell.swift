@@ -9,25 +9,26 @@
 import UIKit
 
 class DetailTableViewCell: UITableViewCell {
-
+    
     @IBOutlet weak var posterImage: UIImageView!
     @IBOutlet weak var firstInfoLabel: UILabel!
     @IBOutlet weak var secondInfoLabel: UILabel!
     @IBOutlet weak var thirdInfoLabel: UILabel!
     @IBOutlet weak var ageImage: UIImageView!
-    
     @IBOutlet weak var reservationRateLabel: UILabel!
     @IBOutlet weak var userRatingLabel: UILabel!
     @IBOutlet weak var audienceLabel: UILabel!
-    
-    
+    @IBOutlet weak var starImage1: UIImageView!
+    @IBOutlet weak var starImage2: UIImageView!
+    @IBOutlet weak var starImage3: UIImageView!
+    @IBOutlet weak var starImage4: UIImageView!
+    @IBOutlet weak var starImage5: UIImageView!
     
     override func awakeFromNib() {
         super.awakeFromNib()
         self.firstInfoLabel.adjustsFontSizeToFitWidth = true
         self.secondInfoLabel.adjustsFontSizeToFitWidth = true
         self.thirdInfoLabel.adjustsFontSizeToFitWidth = true
-        
         self.reservationRateLabel.adjustsFontSizeToFitWidth = true
         self.userRatingLabel.adjustsFontSizeToFitWidth = true
         self.audienceLabel.adjustsFontSizeToFitWidth = true

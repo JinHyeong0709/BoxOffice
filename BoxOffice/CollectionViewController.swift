@@ -13,13 +13,15 @@ extension NSNotification.Name {
 }
 
 class CollectionViewController: UIViewController {
-    let cellid = "collectionViewCell"
+    
+    //MARK:- Property
+    @IBOutlet weak var collectionListView: UICollectionView!
     @IBOutlet weak var settingBtn: UIBarButtonItem!
     @IBOutlet weak var indicator: UIActivityIndicatorView!
+    private let cellid = "collectionViewCell"
     var token: NSObjectProtocol?
     var movieList: [Movie] = []
     var orderType: Int = 0
-    
     
     lazy var refresher: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
@@ -28,32 +30,10 @@ class CollectionViewController: UIViewController {
         return refreshControl
     }()
     
-    
-    @objc func refreshData(_ sender: Any) {
-        fetchURL(orderType: self.orderType)
-        let deadline = DispatchTime.now() + .milliseconds(700)
-        DispatchQueue.main.asyncAfter(deadline: deadline) {
-            self.refresher.endRefreshing()
-        }
-    }
-    
-    @IBOutlet weak var collectionListView: UICollectionView!
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let detailVC = segue.destination as? DetailViewController {
-            if let cell = sender as? ListCollectionViewCell {
-                if let indexPath = collectionListView.indexPath(for: cell) {
-                    let target = movieList[indexPath.item]
-                    detailVC.receiveId = target.id
-                }
-            }
-        }
-    }
-    
+    //MAKR:- FetchURL
     func fetchURL(orderType: Int) {
         self.indicator.startAnimating()
         DispatchQueue.global().async {
-            print(Thread.isMainThread ? "Collection Main Thread" : "Collection Background Thread")
             guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movies?order_type=\(orderType)") else { return }
             
             let session = URLSession(configuration: .default)
@@ -61,13 +41,13 @@ class CollectionViewController: UIViewController {
                 
                 if let error = error {
                     DispatchQueue.main.async {
-                        print(Thread.isMainThread ? "Alert Main Thread" : "Alert Background Thread")
                         self?.showErrorAlert(with:"\(error.localizedDescription)")
                     }
                     return
                 }
                 
                 guard let data = data else { return }
+                
                 DispatchQueue.main.async {
                     self?.indicator.stopAnimating()
                 }
@@ -77,7 +57,6 @@ class CollectionViewController: UIViewController {
                     DispatchQueue.main.async {
                         self?.collectionListView.reloadData()
                     }
-                    
                 } catch let error {
                     DispatchQueue.main.async {
                         self?.showErrorAlert(with:"\(error.localizedDescription)")
@@ -87,6 +66,16 @@ class CollectionViewController: UIViewController {
             dataTask.resume()
         }
         changeTitle(orderType: orderType)
+    }
+    
+    //MAKR:- Function
+    
+    @objc func refreshData(_ sender: Any) {
+        fetchURL(orderType: self.orderType)
+        let deadline = DispatchTime.now() + .milliseconds(800)
+        DispatchQueue.main.asyncAfter(deadline: deadline) {
+            self.refresher.endRefreshing()
+        }
     }
     
     func changeTitle(orderType: Int) {
@@ -125,11 +114,24 @@ class CollectionViewController: UIViewController {
             }
             return self.fetchURL(orderType: self.orderType)
         }))
+        
         let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
         sheetController.addAction(cancel)
         present(sheetController, animated: true)
         
+    }
+    
+    //MARK:- Override
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let detailVC = segue.destination as? DetailViewController {
+            if let cell = sender as? ListCollectionViewCell {
+                if let indexPath = collectionListView.indexPath(for: cell) {
+                    let target = movieList[indexPath.item]
+                    detailVC.receiveId = target.id
+                }
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -144,6 +146,11 @@ class CollectionViewController: UIViewController {
         }
     }
     
+    deinit {
+        if let token = token {
+            NotificationCenter.default.removeObserver(token)
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -159,13 +166,6 @@ class CollectionViewController: UIViewController {
         } else {
             collectionListView.addSubview(refresher)
         }
-        
-    }
-    
-    deinit {
-        if let token = token {
-            NotificationCenter.default.removeObserver(token)
-        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -177,6 +177,7 @@ class CollectionViewController: UIViewController {
     }
 }
 
+//MARK:- Extension
 extension CollectionViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return movieList.count
@@ -212,7 +213,6 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
         guard let layout = collectionViewLayout as? UICollectionViewFlowLayout else {
             return CGSize.zero
         }
-        
         let width = (collectionView.bounds.width - (layout.sectionInset.left + layout.sectionInset.right + layout.minimumLineSpacing)) / 2
         
         return CGSize(width: width, height: width * 1.5)

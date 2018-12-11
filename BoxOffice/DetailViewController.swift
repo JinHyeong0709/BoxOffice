@@ -8,30 +8,24 @@
 
 import UIKit
 
-extension UIViewController {
-    func showErrorAlert(with value: String ) {
-        let alert = UIAlertController(title: "Error", message: value, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
-        
-        self.present(alert, animated: true)
-    }
-}
 class DetailViewController: UIViewController {
     
-    let detailCellid = "detailTableViewCell"
-    let commentCellid = "commentCell"
+    //MARK:- Property
+    @IBOutlet weak var indicator: UIActivityIndicatorView!
+    @IBOutlet weak var detailTableView: UITableView!
     var receiveId: String?
     var info: MovieInfo?
     var commentList: [Comment] = []
-    @IBOutlet weak var indicator: UIActivityIndicatorView!
-    @IBOutlet weak var detailTableView: UITableView!
+    private let cellId = "detailTableViewCell"
+    let fullStarImage = UIImage(named: "ic_star_large_full")!
+    let halfStarImage = UIImage(named: "ic_star_large_half")!
+    let emptyStarImage = UIImage(named: "ic_star_large")!
     
-    
+    //MARK:- fetchURL
     func fetchMovieInfoURL(receiveId : String? ) {
         guard let id = receiveId else { return }
         self.indicator.startAnimating()
         DispatchQueue.global().async {
-            print(Thread.isMainThread ? "Detail Main Thread" : "Detail Background Thread")
             guard let url = URL(string: "http://connect-boxoffice.run.goorm.io/movie?id=\(id))") else { return }
             
             let session = URLSession(configuration: .default)
@@ -60,7 +54,6 @@ class DetailViewController: UIViewController {
                     
                 } catch let error {
                     DispatchQueue.main.async {
-                        print(Thread.isMainThread ? "Alert Main Thread" : "Alert Background Thread")
                         self?.showErrorAlert(with:"\(error.localizedDescription)")
                     }
                 }
@@ -97,7 +90,6 @@ class DetailViewController: UIViewController {
                 
             } catch let error {
                 DispatchQueue.main.async {
-                    print(Thread.isMainThread ? "Alert Main Thread" : "Alert Background Thread")
                     self?.showErrorAlert(with:"\(error.localizedDescription)")
                 }
             }
@@ -106,10 +98,32 @@ class DetailViewController: UIViewController {
         dataTask2.resume()
     }
     
+    //MARK:- Function
+    func getUserRating(starNumber: Int, rating: Double) -> UIImage {
+        let ratingInt = (Int(rating))
+        let userRating = ratingInt / 2
+        
+        if ratingInt % 2 == 1 {
+            if userRating >= starNumber {
+                return fullStarImage
+            } else if userRating + 1 == starNumber {
+                return halfStarImage
+            } else {
+                return emptyStarImage
+            }
+        } else {
+            if userRating >= starNumber {
+                return fullStarImage
+            } else {
+                return emptyStarImage
+            }
+        }
+    }
+    
+    //MARK:- Override
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("detail viewWillAppear")
-        
         
     }
     
@@ -134,13 +148,13 @@ class DetailViewController: UIViewController {
         self.fetchCommentURL(receiveId: receiveId)
         self.view.bringSubviewToFront(indicator)
     }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-    
 }
 
-
+//MARK:- Extension
 extension DetailViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 4
@@ -150,7 +164,6 @@ extension DetailViewController: UITableViewDataSource {
         switch section {
         case 0,1,2:
             return 1
-            
         case 3:
             return commentList.count
         default:
@@ -159,10 +172,9 @@ extension DetailViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         switch indexPath.section {
         case 0:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "detailTableViewCell") as! DetailTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: cellId) as! DetailTableViewCell
             guard let target = info else { return cell }
             cell.firstInfoLabel.text = target.title
             cell.secondInfoLabel.text = "\(target.date)개봉"
@@ -177,6 +189,12 @@ extension DetailViewController: UITableViewDataSource {
                 cell.audienceLabel.text = "누적관객수\n\(audience)"
             }
             
+            cell.starImage1.image = getUserRating(starNumber: 1, rating: target.userRating)
+            cell.starImage2.image = getUserRating(starNumber: 2, rating: target.userRating)
+            cell.starImage3.image = getUserRating(starNumber: 3, rating: target.userRating)
+            cell.starImage4.image = getUserRating(starNumber: 4, rating: target.userRating)
+            cell.starImage5.image = getUserRating(starNumber: 5, rating: target.userRating)
+            
             DispatchQueue.global().async {
                 guard let posterURL = URL(string: target.image) else { return }
                 guard let imageData = try? Data(contentsOf: posterURL) else { return }
@@ -184,6 +202,7 @@ extension DetailViewController: UITableViewDataSource {
                     cell.posterImage.image = UIImage(data: imageData)
                 }
             }
+            
             return cell
             
         case 1:
@@ -193,10 +212,11 @@ extension DetailViewController: UITableViewDataSource {
             
             return cell
             
-        case 2: let cell = tableView.dequeueReusableCell(withIdentifier: "directorCell") as! DirectorTableViewCell
-        guard let target = info else { return cell }
-        cell.directorLabel.text = target.director
-        cell.actorLabel.text = target.actor
+        case 2:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "directorCell") as! DirectorTableViewCell
+            guard let target = info else { return cell }
+            cell.directorLabel.text = target.director
+            cell.actorLabel.text = target.actor
         
         return cell
             
@@ -206,12 +226,20 @@ extension DetailViewController: UITableViewDataSource {
             
             let formatter = DateFormatter()
             let timestamp = Date(timeIntervalSince1970: TimeInterval(target.timestamp))
-            formatter.dateFormat = "yyyy-mm-dd HH:mm:ss"
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            formatter.timeZone = TimeZone(abbreviation: "UTC")
+            
             let dateString = formatter.string(from: timestamp)
             
             cell.idLabel.text = target.writer
             cell.dateLabel.text = "\(dateString)"
             cell.commentLabel.text = target.contents
+            
+            cell.starImage1.image = getUserRating(starNumber: 1, rating: target.rating)
+            cell.starImage2.image = getUserRating(starNumber: 2, rating: target.rating)
+            cell.starImage3.image = getUserRating(starNumber: 3, rating: target.rating)
+            cell.starImage4.image = getUserRating(starNumber: 4, rating: target.rating)
+            cell.starImage5.image = getUserRating(starNumber: 5, rating: target.rating)
             
             return cell
             
@@ -228,5 +256,37 @@ extension DetailViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
+    }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let footerView = UIView()
+        footerView.backgroundColor = UIColor.darkGray
+        
+        switch section {
+        case 2:
+            footerView.backgroundColor = UIColor.white
+            return footerView
+            
+        default:
+            return footerView
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        switch section {
+        case 0,1,2:
+            return 5
+        default:
+            return 0
+        }
+    }
+}
+
+extension UIViewController {
+    func showErrorAlert(with value: String ) {
+        let alert = UIAlertController(title: "Error", message: value, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        
+        self.present(alert, animated: true)
     }
 }
