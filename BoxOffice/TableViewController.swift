@@ -134,14 +134,13 @@ class TableViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("tableView viewWillAppear")
         
         self.fetchURL(orderType: orderType)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("tableView viewDidLoad")
+        
         self.view.bringSubviewToFront(indicator)
         
         if #available(iOS 10.0, *) {

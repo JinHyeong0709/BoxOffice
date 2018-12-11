@@ -121,29 +121,20 @@ class DetailViewController: UIViewController {
     }
     
     //MARK:- Override
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        print("detail viewWillAppear")
-        
-    }
-    
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        print("detail ViewDidDisappear")
         self.navigationController?.popViewController(animated: true)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        print("detail viewDidAppear")
+        
         guard let target = info else { return }
         self.navigationItem.title = target.title
-        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("detail ViewDidLoad")
         self.fetchMovieInfoURL(receiveId: receiveId)
         self.fetchCommentURL(receiveId: receiveId)
         self.view.bringSubviewToFront(indicator)
@@ -259,16 +250,15 @@ extension DetailViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        
         let footerView = UIView()
         footerView.backgroundColor = UIColor.darkGray
         
         switch section {
-        case 2:
-            footerView.backgroundColor = UIColor.white
+        case 0,1,2:
             return footerView
-            
         default:
-            return footerView
+            return nil
         }
     }
     
