@@ -129,6 +129,7 @@ class CollectionViewController: UIViewController {
                 if let indexPath = collectionListView.indexPath(for: cell) {
                     let target = movieList[indexPath.item]
                     detailVC.receiveId = target.id
+                    detailVC.receiveTitle = target.title
                 }
             }
         }

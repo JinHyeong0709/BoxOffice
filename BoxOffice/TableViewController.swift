@@ -127,6 +127,7 @@ class TableViewController: UIViewController {
                 if let indexPath = listTableView.indexPath(for: cell) {
                     let target = movieList[indexPath.row]
                     detailVC.receiveId = target.id
+                    detailVC.receiveTitle = target.title
                 }
             }
         }
@@ -170,12 +171,8 @@ class TableViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-    
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return UIStatusBarStyle.lightContent
-    }
-    
 }
+
 //MARK:- Extension
 extension TableViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

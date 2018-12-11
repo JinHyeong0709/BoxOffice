@@ -14,6 +14,7 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var indicator: UIActivityIndicatorView!
     @IBOutlet weak var detailTableView: UITableView!
     var receiveId: String?
+    var receiveTitle: String?
     var info: MovieInfo?
     var commentList: [Comment] = []
     private let cellId = "detailTableViewCell"
@@ -126,15 +127,13 @@ class DetailViewController: UIViewController {
         self.navigationController?.popViewController(animated: true)
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        guard let target = info else { return }
-        self.navigationItem.title = target.title
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
+        guard let title = self.receiveTitle else {
+            return
+        }
+        
+        self.navigationItem.title = title
         self.fetchMovieInfoURL(receiveId: receiveId)
         self.fetchCommentURL(receiveId: receiveId)
         self.view.bringSubviewToFront(indicator)
